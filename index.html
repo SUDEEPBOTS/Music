@@ -313,7 +313,6 @@
             if(!query) return;
 
             // 1. SHOW SKELETON LOADER (Structure Loading)
-            // Hum nakli cards banayenge jo chamkenge
             let skeletonHTML = '';
             for(let i=0; i<3; i++) {
                 skeletonHTML += `
@@ -329,7 +328,10 @@
             feed.innerHTML = skeletonHTML;
 
             const apiKey = "YUKI-D48896353AE8";
-            const url = `https://fastapi2-wdtl.onrender.com/getvideo?query=${encodeURIComponent(query)}&key=${apiKey}`;
+            
+            // 🔥 UPDATE: PROXY USE KAR RAHE HAIN (CORS FIX)
+            const targetUrl = `https://fastapi2-wdtl.onrender.com/getvideo?query=${encodeURIComponent(query)}&key=${apiKey}`;
+            const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
 
             try {
                 const res = await fetch(url);
@@ -337,7 +339,6 @@
 
                 if(data.status === 200) {
                     // 2. DATA LOADED - Show Real Content
-                    // Naya song sabse upar add hoga (Previous results bhi rahenge)
                     const newSongHTML = `
                         <div class="song-card" onclick="playSong('${data.link}', '${data.title}', '${data.thumbnail}')">
                             <img src="${data.thumbnail}" class="thumb">
@@ -349,10 +350,6 @@
                         </div>
                     `;
                     
-                    // Skeleton hata ke content daalo
-                    // Agar infinite list chahiye toh:
-                    // feed.innerHTML = newSongHTML + feed.innerHTML; 
-                    // Lekin abhi search result replace karte hain clean look ke liye:
                     feed.innerHTML = newSongHTML;
                     
                 } else {
@@ -360,7 +357,7 @@
                 }
             } catch (e) {
                 console.log(e);
-                feed.innerHTML = '<p>Error fetching song.</p>';
+                feed.innerHTML = '<p>Error fetching song (Check Console).</p>';
             }
         }
 
@@ -387,31 +384,27 @@
 
         // --- PLAYER EVENTS FOR BUFFERING ANIMATION ---
 
-        // 1. Jab gaana load ho raha ho ya atak gaya ho (Buffering)
         player.addEventListener('waiting', () => {
             playIcon.style.display = 'none';
-            spinner.style.display = 'block'; // Show Spinner
+            spinner.style.display = 'block'; 
         });
 
-        // 2. Jab gaana chalne lage (Playing)
         player.addEventListener('playing', () => {
-            spinner.style.display = 'none'; // Hide Spinner
+            spinner.style.display = 'none'; 
             playIcon.style.display = 'block';
             playIcon.classList.remove('fa-play');
             playIcon.classList.add('fa-pause');
-            playIcon.style.marginLeft = "0"; // Center alignment fix
+            playIcon.style.marginLeft = "0"; 
         });
 
-        // 3. Jab gaana pause ho
         player.addEventListener('pause', () => {
             spinner.style.display = 'none';
             playIcon.style.display = 'block';
             playIcon.classList.remove('fa-pause');
             playIcon.classList.add('fa-play');
-            playIcon.style.marginLeft = "2px"; // Visual correction
+            playIcon.style.marginLeft = "2px"; 
         });
 
-        // 4. Progress Bar Update
         player.addEventListener('timeupdate', () => {
             if(player.duration) {
                 const percent = (player.currentTime / player.duration) * 100;
